@@ -1,41 +1,51 @@
-import os
+from flask import Flask, render_template, request
 import pickle
+import os
 import subprocess
-from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-MODEL_PATH = "model/sentiment_model.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "model", "sentiment_model.pkl")
 
-# Agar model file nahi hai to pehle train karo
-if not os.path.exists(MODEL_PATH):
-    print("Model not found. Training model...")
-    subprocess.run(["python", "model/train_model.py"], check=True)
-
-# Trained model load karo
-with open(MODEL_PATH, "rb") as f:
-    model, vectorizer = pickle.load(f)
+model = None
+vectorizer = None
 
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+def load_or_train_model():
+    global model, vectorizer
+
+    if os.path.exists(MODEL_PATH):
+        with open(MODEL_PATH, "rb") as f:
+            model, vectorizer = pickle.load(f)
+        print("Model loaded successfully")
+    else:
+        print("Model not found. Training model...")
+        subprocess.run(["python", "model/train_model.py"], check=True)
+
+        with open(MODEL_PATH, "rb") as f:
+            model, vectorizer = pickle.load(f)
+        print("Model trained and loaded")
 
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
-    text = data.get("text", "")
+@app.route("/", methods=["GET", "POST"])
+def index():
+    sentiment = None
 
-    if text.strip() == "":
-        return jsonify({"sentiment": "Please enter some text 📝"})
+    if request.method == "POST":
+        text = request.form["text"]
 
-    text_vector = vectorizer.transform([text])
-    prediction = model.predict(text_vector)[0]
+        if model is None or vectorizer is None:
+            load_or_train_model()
 
-    result = "Positive 😊💖" if prediction == 1 else "Negative 😔💔"
-    return jsonify({"sentiment": result})
+        text_vector = vectorizer.transform([text])
+        prediction = model.predict(text_vector)[0]
+
+        sentiment = "Positive 😊" if prediction == 1 else "Negative 😞"
+
+    return render_template("index.html", sentiment=sentiment)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
