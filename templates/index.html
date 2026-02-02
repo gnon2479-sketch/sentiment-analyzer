@@ -1,22 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sentiment Analyzer</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>VibeCheck 💖</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
 <div class="container">
-    <h1>Sentiment Analyzer</h1>
+    <h1>VibeCheck 💅</h1>
 
-    <textarea id="text" placeholder="Type something..."></textarea>
+    <form method="POST" action="/">
+        <textarea 
+            name="text" 
+            placeholder="Type your thoughts here..." 
+            required></textarea>
 
-    <button onclick="analyze()">✨ Analyze Vibes ✨</button>
+        <button type="submit">Analyze ✨</button>
+    </form>
 
-
-    <h2 id="result"></h2>
+    {% if sentiment %}
+        <div class="result">
+            <h2>{{ sentiment }}</h2>
+        </div>
+    {% endif %}
 </div>
 
-<script src="/static/script.js"></script>
 </body>
 </html>
