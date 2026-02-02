@@ -35,8 +35,10 @@ model = LogisticRegression()
 model.fit(X_tfidf, y)
 
 # 6. Save model and vectorizer
-with open("sentiment_model.pkl", "wb") as f:
+with open("model/sentiment_model.pkl", "wb") as f:
     pickle.dump((model, vectorizer), f)
 
 print("Model trained and saved")
+
+
 
