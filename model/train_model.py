@@ -5,7 +5,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 # 1. Load dataset
-df = pd.read_csv("../dataset/imdb_small.csv")
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "dataset", "imdb_small.csv")
+
+df = pd.read_csv(DATA_PATH)
+
 
 # 2. Convert labels to numbers
 df["sentiment"] = df["sentiment"].map({
@@ -33,3 +39,4 @@ with open("sentiment_model.pkl", "wb") as f:
     pickle.dump((model, vectorizer), f)
 
 print("Model trained and saved")
+
